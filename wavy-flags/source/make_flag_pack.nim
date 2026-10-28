@@ -27,6 +27,11 @@ let work = getTempDir() / "carvio_flag_pack"
 removeDir(work)
 createDir(work)
 
+proc mm(v: float): string =
+  ## A size to a tenth of a millimetre, without a trailing ".0" ("200", "333.3").
+  result = formatFloat(v, ffDecimal, 1)
+  if result.endsWith(".0"): result.setLen(result.len - 2)
+
 var files: seq[string]
 for (file, ratio) in Flags:
   let path = stlDir / "wavy-flag-" & file & ".stl"
@@ -40,9 +45,8 @@ for (file, ratio) in Flags:
   c.field.data = r.data
   c.mask = r.mask
   let name = "Wavy flag " & ratio
-  let description = "A flag rippling in the wind, " & ratio & " (hoist to fly), " & formatFloat(size.x, ffDecimal, 1).replace(".0", "") &
-                    " x " & formatFloat(size.y, ffDecimal, 0) & " mm and " & formatFloat(size.z, ffDecimal, 0) &
-                    " mm high (an 8 mm ripple on a 3 mm base). Lay flag artwork over it to give the flag a waving look."
+  let description = "A flag rippling in the wind, " & ratio & " (hoist to fly), " & mm(size.x) & " x " & mm(size.y) &
+                    " mm and " & mm(size.z) & " mm high (an 8 mm ripple on a 3 mm base). Lay flag artwork over it to give the flag a waving look."
   let written = writeComponentClip(c, work, name, description, Tags)
   files.add readFile(written)
   echo "packed ", name, " (", r.w, " x ", r.h, " cells, ", files[^1].len div 1024, " KB)"
